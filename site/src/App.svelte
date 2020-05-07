@@ -14,13 +14,19 @@
   let imageURL = "";
   let showImage = false;
 	let loading = false;
+
+	let ender = '?'
 	
 	// Reactive statement to check the validity of the URL
   $: {
     isURL(url)
       ? ((isValidURL = true), (border = "border-gray-200"))
-      : ((isValidURL = false), (border = "border-red-500"));
-  }
+			: ((isValidURL = false), (border = "border-red-500"));
+	}
+	
+	function changeEnder() {
+		fullpage ? (ender = '!') : (ender = '?')
+	}
 
 	// Do some simple state management and construct a query string for the image
   async function loadImage() {
@@ -69,6 +75,12 @@
 </script>
 
 <style>
+	#fullpage + label::after {
+		content: "?"
+	}
+	#fullpage:checked + label::after {
+		content: "!"
+	}
   #fullpage:checked + label {
     background-color: rgb(51, 51, 51);
     color: rgb(240, 240, 240);
@@ -284,14 +296,8 @@
             focus:outline-none focus:bg-white focus:border-gray-500 text-center
             select-none cursor-pointer"
             for="fullpage">
-            Take full page screenshot{fullpage ? '?' : '!'}
+						Take full page screenshot
           </label>
-          <!-- <label class="flex items-center text-gray-700 font-bold h-full">
-						<input class="inline-block mr-2 my-auto leading-tight" type="checkbox">
-						<span class="text-sm">
-							Take full page screenshot
-						</span>
-					</label> -->
         </div>
       </div>
 
