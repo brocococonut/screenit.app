@@ -5,10 +5,12 @@ const fs = require('fs-extra')
 const Koa = require('koa');
 const serve = require('koa-static')
 const route = require('koa-route')
+const ratelimit = require('koa-ratelimit');
 const puppeteer = require('puppeteer')
 const rimraf = require('rimraf')
 
 const app = new Koa()
+const db = new Map();
 
 const fsDebug = debug('app:fs')
 const httpDebug = debug('app:http')
@@ -63,6 +65,21 @@ const viewports = {
   }
 }
 
+app.use(route.get('/screenshot', ratelimit({
+  driver: 'memory',
+  db,
+  duration: 30000,
+  errorMessage: 'Maybe you should drink less coffee...',
+  id: (ctx) => ctx.ip,
+  headers: {
+    remaining: 'Rate-Limit-Remaining',
+    reset: 'Rate-Limit-Reset',
+    total: 'Rate-Limit-Total'
+  },
+  max: 6,
+  disableHeader: false
+})))
+
 // Simple hasher for screenshot dir naming
 const hasher = (str = '') => {
   var hash = 0, i, chr;
@@ -109,7 +126,7 @@ async function init() {
   const events = ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException']
   events.map(ev => process.on(ev, exitHandler.bind()))
 
-  app.use(serve('site'))
+  app.use(serve('../site/public'))
 
   // Main route
   app.use(route.get('/screenshot', async ctx => {
@@ -174,6 +191,7 @@ async function init() {
 
       const screenshotOpts = {
         fullPage,
+        path: fileName,
         clip: {
           x: 0,
           y: 0,
@@ -185,7 +203,6 @@ async function init() {
       if (fullPage) delete screenshotOpts.clip
 
       const buffer = await page.screenshot(screenshotOpts)
-      await fs.writeFile(fileName, buffer)
 
       // Add the info to the response context
       ctx.attachment(fileAttachmentName, attachmentOpts)
@@ -204,7 +221,7 @@ async function init() {
   }))
 
   // Schedule to remove old temp files
-  cron.schedule('*/2 * * * * *', async () => {
+  cron.schedule('*/5 * * * *', async () => {
     try {
       const curTime = new Date().getTime()
       const remainder = curTime % interval

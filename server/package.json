@@ -13,6 +13,7 @@
     "fs-extra": "^9.0.0",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
+    "koa-ratelimit": "^4.2.1",
     "koa-route": "^3.2.0",
     "koa-static": "^5.0.0",
     "node-cron": "^2.0.3",
