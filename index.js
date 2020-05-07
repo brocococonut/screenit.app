@@ -113,6 +113,9 @@ async function init() {
 
   // Main route
   app.use(route.get('/screenshot', async ctx => {
+    // Puppeteer initialisation
+    const page = await browser.newPage()
+
     try {
       // Limiter to prevent excessive screenshots
       let flooredTime = getTimeFloored()
@@ -163,9 +166,6 @@ async function init() {
         }
       }
 
-      // Puppeteer initialisation
-      const page = await browser.newPage()
-
       // Screen/device emulation
       await page.emulate(viewports[size])
       await page.goto(domain.toString(), { waitUntil: 'networkidle0', timeout: TIMEOUT })
@@ -199,6 +199,8 @@ async function init() {
         error: err.toString(),
         message: 'Failed to load page'
       }
+    } finally {
+      await page.close()
     }
   }))
 
