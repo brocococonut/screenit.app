@@ -191,7 +191,6 @@ async function init() {
       ctx.attachment(fileAttachmentName, attachmentOpts)
       ctx.body = buffer
 
-      await page.close()
       return null
     } catch (err) {
       httpDebug(err)
