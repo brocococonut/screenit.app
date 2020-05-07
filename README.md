@@ -10,5 +10,6 @@ The `/screenshot` route has 3 querystring arguments currently:
   * `m` - Mobile (375w x 812h)
   * `t` - Tablet (1024w x 1366h)
   * `d` - Desktop (1920w x 1080h)
+* `url` - The URL to screenshot. A protocol is required and can be one of the following: `https://`, `//` `http://`
 
 The file will be cached for 2 * the interval (sometimes a little longer) so subsequent requests of the same domain/path and size are faster.
